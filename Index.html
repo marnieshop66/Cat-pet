@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>毛孩天地 — 英短貓舍</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+TC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #f5f0e0;
+  --warm: #faf7ee;
+  --sand: #e0d4b8;
+  --tan: #c8b48a;
+  --caramel: #9a7a50;
+  --brown: #5a3e28;
+  --dark: #2c1e10;
+  --accent: #7a6040;
+  --menu-bg: #5a3e28;
+  --tag-green: #7a9a6a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--cream); color:var(--dark); font-family:'Noto Serif TC',serif; }
+
+/* HEADER */
+header {
+  position:sticky; top:0; z-index:200;
+  background:rgba(245,240,224,0.96);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--sand);
+  height:64px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 1.4rem;
+}
+.menu-btn {
+  display:flex; flex-direction:column; gap:5px;
+  background:none; border:none; cursor:pointer; padding:6px;
+}
+.menu-btn span {
+  display:block; width:22px; height:2px;
+  background:var(--brown); border-radius:2px;
+}
+.logo-wrap { text-align:center; }
+.logo-icon { font-size:1.6rem; line-height:1; display:block; }
+.logo-name {
+  font-family:'Cormorant Garamond',serif;
+  font-size:1rem; font-weight:600;
+  color:var(--brown); letter-spacing:.08em; display:block;
+}
+.logo-sub {
+  font-size:.52rem; letter-spacing:.2em;
+  color:var(--caramel); text-transform:uppercase;
+}
+.cart-btn {
+  position:relative;
+  background:var(--brown); color:var(--cream);
+  border:none; cursor:pointer;
+  width:40px; height:40px; border-radius:50%;
+  font-size:1.05rem;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .2s;
+}
+.cart-btn:hover { background:var(--accent); }
+.cart-count {
+  position:absolute; top:-3px; right:-3px;
+  background:#c05a2a; color:#fff;
+  width:17px; height:17px; border-radius:50%;
+  font-size:.6rem; display:none;
+  align-items:center; justify-content:center; font-weight:700;
+}
+.cart-count.show { display:flex; }
+.cart-count.pop { animation:pop .3s ease; }
+@keyframes pop { 50%{transform:scale(1.5)} }
+
+/* OVERLAY */
+.overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.45);
+  z-index:300; opacity:0; pointer-events:none; transition:opacity .3s;
+}
+.overlay.open { opacity:1; pointer-events:all; }
+
+/* SIDE MENU */
+.side-menu {
+  position:fixed; top:0; left:0; bottom:0; width:260px;
+  background:var(--menu-bg); z-index:400;
+  transform:translateX(-100%); transition:transform .35s cubic-bezier(.4,0,.2,1);
+  display:flex; flex-direction:column; padding:1.5rem 0;
+}
+.side-menu.open { transform:translateX(0); }
+.menu-close {
+  align-self:flex-end; margin-right:1.2rem; margin-bottom:1.5rem;
+  background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer;
+}
+.side-menu a {
+  display:block; padding:1rem 2rem;
+  color:#fff; text-decoration:none; font-size:.9rem; letter-spacing:.1em;
+  border-bottom:1px solid rgba(255,255,255,.1); transition:background .2s;
+}
+.side-menu a:hover { background:rgba(255,255,255,.1); }
+
+/* HERO */
+.hero {
+  background:linear-gradient(135deg,#f0e8d0 0%,#e8dcc0 50%,#ddd0b0 100%);
+  padding:2.8rem 1.5rem 2.2rem; text-align:center; position:relative; overflow:hidden;
+}
+.hero::after {
+  content:'🐾'; position:absolute; right:4%; top:50%; transform:translateY(-50%);
+  font-size:9rem; opacity:.05; pointer-events:none;
+}
+.hero-eyebrow {
+  font-size:.65rem; letter-spacing:.28em; text-transform:uppercase;
+  color:var(--caramel); margin-bottom:.9rem;
+  display:flex; align-items:center; justify-content:center; gap:.7rem;
+}
+.hero-eyebrow::before,.hero-eyebrow::after {
+  content:''; display:block; width:28px; height:1px; background:var(--tan);
+}
+.hero h1 {
+  font-family:'Cormorant Garamond',serif;
+  font-size:2.5rem; font-weight:300; line-height:1.2; color:var(--dark); margin-bottom:.9rem;
+}
+.hero h1 em { font-style:italic; color:var(--accent); }
+.hero p { font-size:.8rem; color:var(--caramel); line-height:1.95; }
+
+/* SORT BAR */
+.sort-bar {
+  padding:.85rem 1.4rem;
+  display:flex; align-items:center; justify-content:flex-end; gap:.8rem;
+  border-bottom:1px solid var(--sand); background:var(--warm);
+}
+.sort-btn {
+  background:none; border:none; cursor:pointer;
+  font-family:'Noto Serif TC',serif;
+  font-size:.78rem; color:var(--caramel);
+  padding:.3rem .7rem; border-radius:1rem;
+  display:flex; align-items:center; gap:.25rem;
+  transition:all .2s;
+}
+.sort-btn:hover,.sort-btn.active { color:var(--brown); background:var(--sand); }
+
+/* PRODUCT GRID */
+.products {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:1px; background:var(--sand);
+}
+.card { background:var(--warm); cursor:pointer; overflow:hidden; transition:background .2s; }
+.card:hover { background:#f0e8d8; }
+.card-img-wrap { position:relative; overflow:hidden; aspect-ratio:1/1; }
+.card-img-wrap img {
+  width:100%; height:100%; object-fit:cover; display:block;
+  transition:transform .5s ease;
+}
+.card:hover .card-img-wrap img { transform:scale(1.06); }
+.card-badge {
+  position:absolute; top:.6rem; left:.6rem;
+  background:var(--tag-green); color:#fff;
+  font-size:.55rem; letter-spacing:.1em; padding:.2rem .55rem; border-radius:.2rem;
+}
+.card-badge.sold-badge { background:#aaa; }
+.card-info { padding:.85rem .9rem 1rem; }
+.card-date { font-size:.6rem; color:var(--tan); margin-bottom:.28rem; }
+.card-name { font-size:.85rem; line-height:1.55; color:var(--dark); font-weight:500; margin-bottom:.6rem; }
+.card-footer { display:flex; align-items:center; justify-content:space-between; }
+.card-price { font-family:'Cormorant Garamond',serif; font-size:1.15rem; font-weight:600; color:var(--brown); }
+.add-btn {
+  background:var(--brown); color:var(--cream);
+  border:none; cursor:pointer;
+  width:30px; height:30px; border-radius:50%;
+  font-size:1rem; display:flex; align-items:center; justify-content:center;
+  transition:background .2s, transform .15s; flex-shrink:0;
+}
+.add-btn:hover { background:var(--accent); transform:scale(1.1); }
+.add-btn.added { background:#6a9a5a; }
+
+/* CART PANEL */
+.cart-panel {
+  position:fixed; right:0; top:0; bottom:0;
+  width:min(340px,100vw); background:var(--warm);
+  z-index:500; transform:translateX(110%);
+  transition:transform .4s cubic-bezier(.4,0,.2,1);
+  display:flex; flex-direction:column;
+  border-left:1px solid var(--sand); box-shadow:-8px 0 32px rgba(0,0,0,.1);
+}
+.cart-panel.open { transform:translateX(0); }
+.cart-head {
+  padding:1.2rem 1.4rem; border-bottom:1px solid var(--sand);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.cart-head h2 { font-family:'Cormorant Garamond',serif; font-size:1.3rem; font-weight:400; color:var(--brown); }
+.close-cart { background:none; border:none; cursor:pointer; font-size:1.2rem; color:var(--caramel); }
+.close-cart:hover { color:var(--dark); }
+.cart-items { flex:1; overflow-y:auto; padding:1rem; }
+.cart-items::-webkit-scrollbar { width:4px; }
+.cart-items::-webkit-scrollbar-thumb { background:var(--tan); border-radius:4px; }
+.empty-msg { text-align:center; padding:3rem 1rem; color:var(--tan); font-size:.82rem; line-height:2.2; }
+.empty-msg .big { font-size:2.5rem; display:block; margin-bottom:.4rem; opacity:.4; }
+.cart-item {
+  display:flex; gap:.8rem; align-items:flex-start;
+  padding:.8rem; border-radius:.5rem; margin-bottom:.5rem;
+  background:var(--cream); border:1px solid var(--sand);
+  animation:slideIn .25s ease;
+}
+@keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+.ci-img { width:58px; height:58px; border-radius:.35rem; object-fit:cover; flex-shrink:0; }
+.ci-body { flex:1; min-width:0; }
+.ci-name { font-size:.78rem; font-weight:500; margin-bottom:.3rem; line-height:1.4; }
+.ci-price { font-family:'Cormorant Garamond',serif; font-size:.98rem; font-weight:600; color:var(--brown); }
+.ci-remove { background:none; border:none; cursor:pointer; color:var(--tan); font-size:.9rem; }
+.ci-remove:hover { color:#c05a2a; }
+.cart-footer { padding:1.2rem 1.4rem; border-top:1px solid var(--sand); }
+.cart-total { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+.cart-total span { font-size:.8rem; color:var(--caramel); }
+.cart-total strong { font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:600; color:var(--brown); }
+.checkout-btn {
+  width:100%; padding:.9rem;
+  background:var(--brown); color:var(--cream);
+  border:none; cursor:pointer; border-radius:.35rem;
+  font-family:'Noto Serif TC',serif; font-size:.85rem; letter-spacing:.18em;
+  transition:background .2s;
+}
+.checkout-btn:hover { background:var(--accent); }
+.note { text-align:center; font-size:.6rem; color:var(--tan); margin-top:.6rem; letter-spacing:.05em; }
+
+/* MODAL */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.55);
+  z-index:600; display:flex; align-items:flex-end;
+  opacity:0; pointer-events:none; transition:opacity .3s;
+}
+.modal-overlay.open { opacity:1; pointer-events:all; }
+.modal {
+  background:var(--warm); width:100%;
+  max-height:92vh; overflow-y:auto;
+  border-radius:1.2rem 1.2rem 0 0;
+  transform:translateY(60px); transition:transform .35s cubic-bezier(.4,0,.2,1);
+}
+.modal-overlay.open .modal { transform:translateY(0); }
+.modal-img-wrap { position:relative; }
+.modal-img { width:100%; aspect-ratio:4/3; object-fit:cover; display:block; }
+.modal-close-x {
+  position:absolute; top:.8rem; right:.8rem;
+  background:rgba(255,255,255,.88); border:none; cursor:pointer;
+  width:34px; height:34px; border-radius:50%; font-size:.95rem;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--dark); box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.modal-body { padding:1.4rem; }
+.modal-tag { font-size:.62rem; letter-spacing:.16em; text-transform:uppercase; color:var(--tag-green); margin-bottom:.4rem; }
+.modal-name { font-family:'Cormorant Garamond',serif; font-size:1.6rem; font-weight:400; margin-bottom:.4rem; }
+.modal-price { font-family:'Cormorant Garamond',serif; font-size:1.9rem; font-weight:600; color:var(--brown); margin-bottom:1rem; }
+.modal-desc { font-size:.8rem; line-height:2; color:var(--caramel); margin-bottom:1.2rem; }
+.modal-specs {
+  display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-bottom:1.4rem;
+}
+.spec { padding:.5rem .7rem; background:var(--cream); border-radius:.3rem; border:1px solid var(--sand); }
+.spec-label { font-size:.58rem; letter-spacing:.14em; text-transform:uppercase; color:var(--tan); }
+.spec-value { font-size:.82rem; color:var(--dark); margin-top:.15rem; }
+.modal-add-btn {
+  width:100%; padding:1rem;
+  background:var(--brown); color:var(--cream);
+  border:none; cursor:pointer; border-radius:.5rem;
+  font-family:'Noto Serif TC',serif; font-size:.9rem; letter-spacing:.2em;
+  transition:background .2s;
+}
+.modal-add-btn:hover { background:var(--accent); }
+.modal-add-btn:disabled { background:#bbb; cursor:default; }
+
+/* TOAST */
+.toast {
+  position:fixed; bottom:1.5rem; left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--brown); color:var(--cream);
+  padding:.65rem 1.4rem; border-radius:2rem;
+  font-size:.78rem; letter-spacing:.06em;
+  z-index:700; transition:transform .3s ease;
+  pointer-events:none; white-space:nowrap;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* FOOTER */
+footer {
+  text-align:center; padding:2rem;
+  border-top:1px solid var(--sand);
+  font-size:.68rem; color:var(--tan); letter-spacing:.1em; line-height:2;
+}
+</style>
+</head>
+<body>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<!-- SIDE MENU -->
+<nav class="side-menu" id="sideMenu">
+  <button class="menu-close" onclick="closeMenu()">✕</button>
+  <a href="#">關於我們</a>
+  <a href="#">最新消息</a>
+  <a href="#">購買流程</a>
+  <a href="#" onclick="closeMenu()">可選購小貓</a>
+  <a href="#">聯絡我們</a>
+</nav>
+
+<!-- HEADER -->
+<header>
+  <button class="menu-btn" onclick="openMenu()">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="logo-wrap">
+    <span class="logo-icon">🐱</span>
+    <span class="logo-name">毛孩天地</span>
+    <span class="logo-sub">British Shorthair Cattery</span>
+  </div>
+  <button class="cart-btn" onclick="openCart()">
+    🛒
+    <span class="cart-count" id="cartCount">0</span>
+  </button>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">英國短毛貓 × 純血繁殖</div>
+  <h1>每一隻都是<br><em>獨一無二的</em>寶貝</h1>
+  <p>健康檢查完整、疫苗施打齊全<br>用心培育每一個毛孩的幸福起點</p>
+</section>
+
+<!-- SORT BAR -->
+<div class="sort-bar">
+  <button class="sort-btn active" id="sort-all" onclick="sortBy('all',this)">綜合 ↕</button>
+  <button class="sort-btn" id="sort-time" onclick="sortBy('time',this)">時間 ↕</button>
+  <button class="sort-btn" id="sort-price" onclick="sortBy('price',this)">價格 ↕</button>
+</div>
+
+<!-- PRODUCT GRID -->
+<main class="products" id="productGrid"></main>
+
+<!-- CART PANEL -->
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-head">
+    <h2>🛍 詢問清單</h2>
+    <button class="close-cart" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="empty-msg">
+      <span class="big">🐾</span>
+      購物車目前是空的<br>快去挑選喜歡的小貓吧！
+    </div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>合計參考金額</span>
+      <strong id="cartTotal">NT$ 0</strong>
+    </div>
+    <button class="checkout-btn" onclick="checkout()">送出詢問</button>
+    <p class="note">※ 實際售價以洽談為準，本頁僅供選貓參考</p>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleModalBg(event)">
+  <div class="modal" id="modal">
+    <div class="modal-img-wrap">
+      <img class="modal-img" id="modalImg" src="" alt="">
+      <button class="modal-close-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tag" id="modalTag"></div>
+      <div class="modal-name" id="modalName"></div>
+      <div class="modal-price" id="modalPrice"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <div class="modal-specs" id="modalSpecs"></div>
+      <button class="modal-add-btn" id="modalAddBtn">加入詢問清單 ＋</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<footer>
+  毛孩天地 英短貓舍 · 台灣<br>
+  健康保證 × 疫苗完整 × 合法繁殖<br>
+  © 2025 All Rights Reserved
+</footer>
+
+<script>
+// DATA
+const cats = [
+  { id:1, date:'115/2/27', name:'黑金點漸層英短妹妹', price:70000, gender:'女生', color:'黑金漸層', birth:'115/2/27', vaccinated:'已施打', sold:false, tag:'可選購',
+    desc:'黑金點漸層花色，毛色漂亮層次分明，個性親人愛撒嬌，健康活潑。疫苗施打完整，健康檢查合格。',
+    img:'https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=600&q=80' },
+  { id:2, date:'115/2/24', name:'黑英短妹妹', price:60000, gender:'女生', color:'純黑', birth:'115/2/24', vaccinated:'已施打', sold:false, tag:'可選購',
+    desc:'純黑色英短，毛色烏黑發亮，個性溫和，喜歡被抱。健康狀況良好，符合英短標準體型。',
+    img:'https://images.unsplash.com/photo-1570336840028-e9a5c9e0a38a?w=600&q=80' },
+  { id:3, date:'115/2/27', name:'黑金漸層弟弟', price:60000, gender:'男生', color:'黑金漸層', birth:'115/2/27', vaccinated:'已施打', sold:false, tag:'可選購',
+    desc:'黑金漸層男生，花色漂亮，臉圓耳小，標準英短體型。活潑愛玩，與人親近。',
+    img:'https://images.unsplash.com/photo-1561948955-570b270e7c36?w=600&q=80' },
+  { id:4, date:'115/2/27', name:'藍金英短妹妹', price:80000, gender:'女生', color:'藍金漸層', birth:'115/2/27', vaccinated:'已施打', sold:false, tag:'精選',
+    desc:'藍金漸層花色，稀有美麗，毛色如絲，骨架紮實。個性乖巧黏人，是完美的家庭伴侶。',
+    img:'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&q=80' },
+  { id:5, date:'115/1/15', name:'銀漸層英短哥哥', price:65000, gender:'男生', color:'銀漸層', birth:'115/1/15', vaccinated:'已施打', sold:false, tag:'可選購',
+    desc:'銀漸層是英短最受歡迎花色之一，毛色銀亮，眼睛碧綠，氣質出眾，個性穩重。',
+    img:'https://images.unsplash.com/photo-1518791841217-8f162f1912da?w=600&q=80' },
+  { id:6, date:'115/1/20', name:'金漸層英短妹妹', price:75000, gender:'女生', color:'金漸層', birth:'115/1/20', vaccinated:'已施打', sold:false, tag:'精選',
+    desc:'金漸層花色溫暖如陽光，毛色金黃，眼神深邃，個性溫順親人，非常適合有孩子的家庭。',
+    img:'https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=600&q=80' },
+];
+
+let cart = [];
+
+// RENDER
+function render(list) {
+  document.getElementById('productGrid').innerHTML = list.map(c=>`
+    <div class="card" onclick="openModal(${c.id})">
+      <div class="card-img-wrap">
+        <img src="${c.img}" alt="${c.name}" loading="lazy">
+        <div class="card-badge${c.sold?' sold-badge':''}">${c.sold?'已售出':c.tag}</div>
+      </div>
+      <div class="card-info">
+        <div class="card-date">${c.date}</div>
+        <div class="card-name">${c.name}</div>
+        <div class="card-footer">
+          <div class="card-price">NT$ ${c.price.toLocaleString()}</div>
+          ${c.sold
+            ? `<span style="font-size:.7rem;color:#aaa">已售出</span>`
+            : `<button class="add-btn" id="ab-${c.id}" onclick="quickAdd(event,${c.id})">＋</button>`}
+        </div>
+      </div>
+    </div>`).join('');
+}
+render(cats);
+
+// SORT
+function sortBy(type, btn) {
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  let list = [...cats];
+  if(type==='time') list.sort((a,b)=>b.id-a.id);
+  else if(type==='price') list.sort((a,b)=>a.price-b.price);
+  render(list);
+}
+
+// MENU
+function openMenu() {
+  document.getElementById('sideMenu').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeMenu() {
+  document.getElementById('sideMenu').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// CART UI
+function updateCart() {
+  const cc = document.getElementById('cartCount');
+  const ci = document.getElementById('cartItems');
+  const ct = document.getElementById('cartTotal');
+  if(!cart.length) {
+    cc.classList.remove('show');
+    ci.innerHTML=`<div class="empty-msg"><span class="big">🐾</span>購物車目前是空的<br>快去挑選喜歡的小貓吧！</div>`;
+    ct.textContent='NT$ 0';
+    return;
+  }
+  cc.textContent=cart.length; cc.classList.add('show');
+  cc.classList.remove('pop'); void cc.offsetWidth; cc.classList.add('pop');
+  let total=0;
+  ci.innerHTML=cart.map(c=>{
+    total+=c.price;
+    return `<div class="cart-item">
+      <img class="ci-img" src="${c.img}" alt="${c.name}">
+      <div class="ci-body">
+        <div class="ci-name">${c.name}</div>
+        <div class="ci-price">NT$ ${c.price.toLocaleString()}</div>
+      </div>
+      <button class="ci-remove" onclick="removeItem(${c.id})">✕</button>
+    </div>`;
+  }).join('');
+  ct.textContent='NT$ '+total.toLocaleString();
+}
+
+function addToCart(id) {
+  const c=cats.find(x=>x.id===id);
+  if(!c||c.sold) return;
+  if(cart.find(x=>x.id===id)) { showToast('此小貓已在清單中 🐾'); return; }
+  cart.push(c);
+  updateCart();
+  showToast(c.name+' 已加入清單 ✓');
+}
+
+function quickAdd(e,id) {
+  e.stopPropagation();
+  addToCart(id);
+  const btn=document.getElementById('ab-'+id);
+  if(btn){ btn.classList.add('added'); btn.textContent='✓';
+    setTimeout(()=>{btn.classList.remove('added');btn.textContent='＋';},1500); }
+}
+
+function removeItem(id) {
+  cart=cart.filter(c=>c.id!==id); updateCart();
+}
+
+function openCart() {
+  document.getElementById('cartPanel').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeCart() {
+  document.getElementById('cartPanel').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function checkout() {
+  if(!cart.length){ showToast('請先選擇小貓 🐱'); return; }
+  const names=cart.map(c=>c.name).join('、');
+  alert(`感謝您的詢問！\n\n您選擇的小貓：\n${names}\n\n我們將盡快與您聯絡，請保持電話暢通。\n\n💛 毛孩天地英短貓舍`);
+  cart=[]; updateCart(); closeCart();
+}
+
+// MODAL
+function openModal(id) {
+  const c=cats.find(x=>x.id===id); if(!c) return;
+  document.getElementById('modalImg').src=c.img;
+  document.getElementById('modalImg').alt=c.name;
+  document.getElementById('modalTag').textContent=c.date+' · '+c.color+' · '+c.gender;
+  document.getElementById('modalName').textContent=c.name;
+  document.getElementById('modalPrice').textContent='NT$ '+c.price.toLocaleString();
+  document.getElementById('modalDesc').textContent=c.desc;
+  document.getElementById('modalSpecs').innerHTML=`
+    <div class="spec"><div class="spec-label">性別</div><div class="spec-value">${c.gender}</div></div>
+    <div class="spec"><div class="spec-label">花色</div><div class="spec-value">${c.color}</div></div>
+    <div class="spec"><div class="spec-label">出生日期</div><div class="spec-value">${c.birth}</div></div>
+    <div class="spec"><div class="spec-label">疫苗</div><div class="spec-value">${c.vaccinated}</div></div>`;
+  const btn=document.getElementById('modalAddBtn');
+  if(c.sold){ btn.textContent='此小貓已售出'; btn.disabled=true; }
+  else { btn.textContent='加入詢問清單 ＋'; btn.disabled=false; btn.onclick=()=>{addToCart(c.id);closeModal();}; }
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function handleModalBg(e) {
+  if(e.target===document.getElementById('modalOverlay')) closeModal();
+}
+
+// TOAST
+let tt;
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2200);
+}
+</script>
+</body>
+</html>
